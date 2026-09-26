@@ -2,11 +2,13 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# 仅拷贝代码与依赖清单；依赖在容器启动时安装（见 CMD）
+# 先拷贝依赖清单并安装（构建阶段完成，docker compose up --build 即可就绪）
 COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 再拷贝应用代码
 COPY app ./app
 
 EXPOSE 8000
 
-# 启动时先安装依赖，再启动服务
-CMD ["sh", "-c", "pip install --no-cache-dir -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
